@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "request.h"
+#include "util.h"
 
 HttpStatus parse_method(char *method_str, HttpMethod *method) {
     if (strcmp(method_str, "GET") == 0) *method = GET;
@@ -18,7 +19,7 @@ HttpStatus parse_cookies(char *cookies, Request *request) {
     char *value = strchop(cookies, "=");
     if (value == NULL) return BAD_REQUEST;
     if (strcmp(cookies, "username") == 0) {
-        strncpy(request->username, value, sizeof(request->username));
+        url_decode(request->username, sizeof(request->username), value);
         request->loggedin = true;
     }
     if (rest == NULL) return NO_STATUS;
@@ -31,11 +32,11 @@ HttpStatus parse_content(char *content, Request *request) {
     char *value = strchop(content, "=");
     if (value == NULL) return BAD_REQUEST;
     if (strcmp(content, "username") == 0) {
-        strncpy(request->username, value, sizeof(request->username));
+        url_decode(request->username, sizeof(request->username), value);
         request->loggedin = true;
     }
     if (strcmp(content, "posttext") == 0) {
-        strncpy(request->posttext, value, sizeof(request->posttext));
+        url_decode(request->posttext, sizeof(request->posttext), value);
         request->hasposttext = true;
     }
     if (rest == NULL) return NO_STATUS;

@@ -58,7 +58,10 @@ void respond(int fd, Request *req, Posts *posts) {
     } else if (route(req, "/login")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
         post_redirect(fd, "/");
-        dprintf(fd, "Set-Cookie: username=%s\r\n", req->username);
+        char encoded_username[sizeof(req->username)];
+        url_encode(encoded_username, sizeof(encoded_username), req->username);
+        printf("%s, %s\n", req->username, encoded_username);
+        dprintf(fd, "Set-Cookie: username=%s\r\n", encoded_username);
         endheader(fd);
     } else if (route(req, "/logout")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);

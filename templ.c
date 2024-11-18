@@ -8,7 +8,7 @@ int eof_or_sep(int c) { return c == EOF || c == SEPARATOR; }
 void generate(FILE *in, FILE *out) {
     int c;
     while (1) {
-        fprintf(out, "PRINTF(\"");
+        fprintf(out, "HTML(\"");
         while (!eof_or_sep(c = getc(in))) fprintf(out, "\\x%02x", c);
         fprintf(out, "\");\n");
         if (c == EOF) return;

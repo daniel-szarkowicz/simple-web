@@ -6,7 +6,7 @@
 #include "posts.h"
 #include "response.h"
 
-#define PRINTF(...) dprintf(fd, __VA_ARGS__)
+#define HTML(str) dprintf(fd, "%s", str)
 void html_escape(int fd, char *str) {
     for (; *str != '\0'; ++str) {
         switch (*str) {

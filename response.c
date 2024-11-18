@@ -4,6 +4,8 @@
 
 #include "request.h"
 
+#define PRINTF(...) dprintf(fd, __VA_ARGS__)
+
 bool route(Request *request, char *route) {
     return strcmp(request->path, route) == 0;
 }
@@ -20,11 +22,17 @@ void onlystatus(int fd, HttpStatus status) {
     endheader(fd);
 }
 
+void post_redirect(int fd, char* loc) {
+    writestatus(fd, SEE_OTHER);
+    dprintf(fd, "Location: %s\r\n", loc);
+}
+
+void index_html(int fd, Request* req) {
+#include "build/index.htmlc"
+}
 
 void notfound(int fd) {
-#define HTML(str) dprintf(fd, "%s", str)
 #include "build/notfound.htmlc"
-#undef HTML
 }
 
 void respond(int fd, Request *req) {
@@ -33,28 +41,20 @@ void respond(int fd, Request *req) {
         writestatus(fd, OK);
         contenthtml(fd);
         endheader(fd);
-        dprintf(fd, "method: %d, %s<br>\n", req->method,
-                methodstr(req->method));
-        dprintf(fd, "path: %s<br>\n", req->fullpath);
-        if (strlen(req->username) != 0) {
-            dprintf(fd, "username: %s<br>\n", req->username);
-        } else {
-            dprintf(fd, "no username<br>\n");
-        }
+        index_html(fd, req);
     } else if (route(req, "/login")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
-        if (strlen(req->content) == 0) return onlystatus(fd, BAD_REQUEST);
-        writestatus(fd, OK);
-        dprintf(fd, "Set-Cookie: username=%s\r\n", req->content);
+        post_redirect(fd, "/");
+        dprintf(fd, "Set-Cookie: username=%s\r\n", req->username);
         endheader(fd);
     } else if (route(req, "/logout")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
-        writestatus(fd, OK);
+        post_redirect(fd, "/");
         dprintf(fd, "Set-Cookie: username=; Max-Age=0\r\n");
-        dprintf(fd, "\r\n");
+        endheader(fd);
     } else if (route(req, "/post")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
-        writestatus(fd, OK);
+        post_redirect(fd, "/");
         endheader(fd);
     } else {
         writestatus(fd, NOT_FOUND);

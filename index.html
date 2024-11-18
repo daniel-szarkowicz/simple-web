@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Lunix </title>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    $ if (req->loggedin) { $
+      Hello $ PRINTF("%s", req->username); $!
+      <form action="/logout" method="post">
+        <input type="submit" value="Log out">
+      </form>
+    $ } else { $
+      <form action="/login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username">
+        <input type="submit" value="Log in">
+      </form>
+    $ } $
+  </body>
+</html>

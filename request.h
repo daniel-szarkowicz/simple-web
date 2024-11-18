@@ -8,6 +8,7 @@ typedef struct {
     char fullpath[1024];
     char *path;
     char username[1024];
+    bool loggedin;
     char content[2048];
 } Request;
 

@@ -1,7 +1,7 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include "request.h"
 
@@ -19,9 +19,23 @@ HttpStatus parse_cookies(char *cookies, Request *request) {
     if (value == NULL) return BAD_REQUEST;
     if (strcmp(cookies, "username") == 0) {
         strncpy(request->username, value, sizeof(request->username));
+        request->loggedin = true;
     }
     if (rest == NULL) return NO_STATUS;
     else return parse_cookies(rest, request);
+}
+
+HttpStatus parse_content(char *content, Request *request) {
+    if (strlen(content) == 0) return NO_STATUS;
+    char *rest = strchop(content, "&");
+    char *value = strchop(content, "=");
+    if (value == NULL) return BAD_REQUEST;
+    if (strcmp(content, "username") == 0) {
+        strncpy(request->username, value, sizeof(request->username));
+        request->loggedin = true;
+    }
+    if (rest == NULL) return NO_STATUS;
+    else return parse_content(rest, request);
 }
 
 static const size_t LINE_LEN = 2048;
@@ -67,5 +81,6 @@ HttpStatus parse_request(int fd, Request *request) {
     if (fread(request->content, 1, content_length, stream) != content_length) {
         return BAD_REQUEST;
     }
+    HTTP_TRY(parse_content(request->content, request));
     return NO_STATUS;
 }

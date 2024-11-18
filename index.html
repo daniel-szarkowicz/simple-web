@@ -6,9 +6,17 @@
   </head>
   <body>
     $ if (req->loggedin) { $
-      Hello $ PRINTF("%s", req->username); $!
+      Hello $ ESCAPE(req->username); $!
       <form action="/logout" method="post">
         <input type="submit" value="Log out">
+      </form>
+      <form action="/post" method="post">
+        <input
+          type="hidden"
+          id="username"
+          name="username"
+          value="ESCAPE(req->username);$">
+        <input type="text" id="posttext" name="posttext">
       </form>
     $ } else { $
       <form action="/login" method="post">
@@ -16,6 +24,14 @@
         <input type="text" id="username" name="username">
         <input type="submit" value="Log in">
       </form>
+    $ } $
+    <h1> Posts: </h1>
+    $ for (size_t i = 0; i < posts->count; ++i) { $
+      <p>
+        User: $ ESCAPE(posts->data[i].username); $
+        <br>
+        Post: $ ESCAPE(posts->data[i].posttext); $
+      </p>
     $ } $
   </body>
 </html>

@@ -1,11 +1,11 @@
 DEPFLAGS := -MMD -MP
-CFLAGS := -Wall -Wextra -fsanitize=address
+CFLAGS := -Wall -Wextra -fsanitize=address -ggdb
 
 BUILD_DIR := ./build
 TARGET := $(BUILD_DIR)/server
 TEMPLATER := $(BUILD_DIR)/templ
 
-SRCS := main.c http.c request.c util.c response.c
+SRCS := main.c http.c request.c util.c response.c posts.c
 
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:%.o=%.d)

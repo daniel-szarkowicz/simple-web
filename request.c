@@ -34,6 +34,10 @@ HttpStatus parse_content(char *content, Request *request) {
         strncpy(request->username, value, sizeof(request->username));
         request->loggedin = true;
     }
+    if (strcmp(content, "posttext") == 0) {
+        strncpy(request->posttext, value, sizeof(request->posttext));
+        request->hasposttext = true;
+    }
     if (rest == NULL) return NO_STATUS;
     else return parse_content(rest, request);
 }
@@ -75,12 +79,13 @@ HttpStatus parse_request(int fd, Request *request) {
             HTTP_TRY(parse_cookies(value, request));
         }
     }
-    if (content_length > sizeof(request->content) - 1) {
+    char content[2048];
+    if (content_length > sizeof(content) - 1) {
         return CONTENT_TOO_LARGE;
     }
-    if (fread(request->content, 1, content_length, stream) != content_length) {
+    if (fread(content, 1, content_length, stream) != content_length) {
         return BAD_REQUEST;
     }
-    HTTP_TRY(parse_content(request->content, request));
+    HTTP_TRY(parse_content(content, request));
     return NO_STATUS;
 }

@@ -2,9 +2,22 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "request.h"
+#include "http.h"
+#include "posts.h"
+#include "response.h"
 
 #define PRINTF(...) dprintf(fd, __VA_ARGS__)
+void html_escape(int fd, char *str) {
+    for (; *str != '\0'; ++str) {
+        switch (*str) {
+        case '<': dprintf(fd, "&lt;"); break;
+        case '>': dprintf(fd, "&gt;"); break;
+        case '&': dprintf(fd, "&amp;"); break;
+        default: dprintf(fd, "%c", *str); break;
+        }
+    }
+}
+#define ESCAPE(str) html_escape(fd, str)
 
 bool route(Request *request, char *route) {
     return strcmp(request->path, route) == 0;
@@ -22,12 +35,12 @@ void onlystatus(int fd, HttpStatus status) {
     endheader(fd);
 }
 
-void post_redirect(int fd, char* loc) {
+void post_redirect(int fd, char *loc) {
     writestatus(fd, SEE_OTHER);
     dprintf(fd, "Location: %s\r\n", loc);
 }
 
-void index_html(int fd, Request* req) {
+void index_html(int fd, Request *req, Posts *posts) {
 #include "build/index.htmlc"
 }
 
@@ -35,13 +48,13 @@ void notfound(int fd) {
 #include "build/notfound.htmlc"
 }
 
-void respond(int fd, Request *req) {
+void respond(int fd, Request *req, Posts *posts) {
     if (route(req, "/")) {
         if (req->method != GET) return onlystatus(fd, METHOD_NOT_ALLOWED);
         writestatus(fd, OK);
         contenthtml(fd);
         endheader(fd);
-        index_html(fd, req);
+        index_html(fd, req, posts);
     } else if (route(req, "/login")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
         post_redirect(fd, "/");
@@ -54,6 +67,13 @@ void respond(int fd, Request *req) {
         endheader(fd);
     } else if (route(req, "/post")) {
         if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
+        if (!req->loggedin) return onlystatus(fd, UNAUTHORIZED);
+        if (!req->hasposttext) return onlystatus(fd, BAD_REQUEST);
+
+        Post *post = posts_reserve(posts);
+        strncpy(post->username, req->username, sizeof(post->username));
+        strncpy(post->posttext, req->posttext, sizeof(post->posttext));
+
         post_redirect(fd, "/");
         endheader(fd);
     } else {

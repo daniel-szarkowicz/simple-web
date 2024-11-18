@@ -14,6 +14,7 @@ const char *httpstatusstr(HttpStatus status) {
     case OK: return "OK";
     case SEE_OTHER: return "SEE_OTHER";
     case BAD_REQUEST: return "BAD_REQUEST";
+    case UNAUTHORIZED: return "UNAUTHORIZED";
     case NOT_FOUND: return "NOT_FOUND";
     case METHOD_NOT_ALLOWED: return "METHOD_NOT_ALLOWED";
     case CONTENT_TOO_LARGE: return "CONTENT_TOO_LARGE";

@@ -9,7 +9,8 @@ typedef struct {
     char *path;
     char username[1024];
     bool loggedin;
-    char content[2048];
+    char posttext[2048];
+    bool hasposttext;
 } Request;
 
 HttpStatus parse_method(char *method_str, HttpMethod *method);

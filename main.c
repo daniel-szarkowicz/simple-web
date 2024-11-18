@@ -10,14 +10,15 @@
 #include <unistd.h>
 
 #include "http.h"
+#include "posts.h"
 #include "request.h"
 #include "response.h"
 
-void handle_client(int fd) {
+void handle_client(int fd, Posts *posts) {
     Request req = {0};
     HttpStatus error = parse_request(fd, &req);
     if (error != NO_STATUS) return onlystatus(fd, error);
-    respond(fd, &req);
+    respond(fd, &req, posts);
 }
 
 int main() {
@@ -44,6 +45,16 @@ int main() {
         exit(1);
     }
 
+    Posts posts = {0};
+    Post* post = posts_reserve(&posts);
+    strcpy(post->username, "Józsi és Pisti");
+    strcpy(
+        post->posttext,
+        "Ez egy teszt post amiben különleges dolgok is lehetnek."
+        "<script> alert(1) </script>"
+        "Ha kaptál egy '1' tartalmú üzenetet, akkor valami nem jó!"
+    );
+
     for (int i = 0; i < 100; ++i) {
         // struct sockaddr_in client_addr;
         // socklen_t client_addrlen;
@@ -54,7 +65,7 @@ int main() {
         }
         // assert(client_addrlen == sizeof(client_addr));
 
-        handle_client(client_fd);
+        handle_client(client_fd, &posts);
 
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);

@@ -30,7 +30,8 @@ void url_decode(char *dest, size_t n, const char *src) {
 void url_encode(char *dest, size_t n, const char *src) {
     for (; *src != '\0'; ++src) {
         int len = snprintf(dest, n, "%%%02x", *src & 0xff);
-        if (len > n) return;
+        if (len < 0) return;
+        if ((size_t)len > n) return;
         dest += len;
         n -= len;
     }

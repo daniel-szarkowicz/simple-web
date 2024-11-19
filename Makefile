@@ -1,5 +1,5 @@
 DEPFLAGS := -MMD -MP
-CFLAGS := -Wall -Wextra -fsanitize=address -ggdb
+CFLAGS := -Werror=all -Werror=extra -fsanitize=address -ggdb
 
 BUILD_DIR := ./build
 TARGET := $(BUILD_DIR)/server

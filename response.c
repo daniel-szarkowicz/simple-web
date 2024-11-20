@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "http.h"
+#include "log.h"
 #include "posts.h"
 #include "response.h"
 #include "util.h"
@@ -49,41 +50,89 @@ void notfound(int fd) {
 #include "build/notfound.htmlc"
 }
 
-// TODO: support HEAD request where GET is supported
-// TODO: log errors where onlystatus is called
-// TODO: log warnings req can be sign of bad frontend
-void respond(int fd, Request *req, Posts *posts) {
-    if (route(req, "/")) {
-        if (req->method != GET) return onlystatus(fd, METHOD_NOT_ALLOWED);
+void starthtml(int fd) {
+    contenthtml(fd);
+    endheader(fd);
+}
+
+void route_root(int fd, Request *req, Posts *posts) {
+    if (req->method != GET && req->method != HEAD) {
+        l(ERROR, "Got method %s for path `%s`", methodstr(req->method),
+          req->path);
+        onlystatus(fd, METHOD_NOT_ALLOWED);
+        return;
+    } else {
         writestatus(fd, OK);
-        contenthtml(fd);
-        endheader(fd);
-        index_html(fd, req, posts);
-    } else if (route(req, "/login")) {
-        if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
+        starthtml(fd);
+        if (req->method == GET) index_html(fd, req, posts);
+    }
+}
+
+void route_login(int fd, Request *req) {
+    if (req->method != POST) {
+        l(ERROR, "Got method %s for path `%s`", methodstr(req->method),
+          req->path);
+        onlystatus(fd, METHOD_NOT_ALLOWED);
+    } else if (!req->hasnewusername) {
+        l(ERROR, "Got login but no username!");
+        onlystatus(fd, BAD_REQUEST);
+        return;
+    } else {
+        if (req->loggedin) {
+            l(WARN, "User is already logged in! Old: `%s`, new: `%s`",
+              req->username, req->newusername);
+        }
         post_redirect(fd, "/");
-        char encoded_username[sizeof(req->username)];
-        url_encode(encoded_username, sizeof(encoded_username), req->username);
-        printf("%s, %s\n", req->username, encoded_username);
+        char encoded_username[sizeof(req->newusername)];
+        url_encode(encoded_username, sizeof(encoded_username),
+                   req->newusername);
+        strncpy(req->username, req->newusername, sizeof(req->username));
         dprintf(fd, "Set-Cookie: username=%s\r\n", encoded_username);
         endheader(fd);
-    } else if (route(req, "/logout")) {
-        if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
+    }
+}
+
+void route_logout(int fd, Request *req) {
+    if (req->method != POST) {
+        l(ERROR, "Got method %s for path `%s`", methodstr(req->method),
+          req->path);
+        onlystatus(fd, METHOD_NOT_ALLOWED);
+    } else {
+        if (!req->loggedin) { l(WARN, "User is already logged out!"); }
         post_redirect(fd, "/");
         dprintf(fd, "Set-Cookie: username=; Max-Age=0\r\n");
         endheader(fd);
-    } else if (route(req, "/post")) {
-        if (req->method != POST) return onlystatus(fd, METHOD_NOT_ALLOWED);
-        if (!req->loggedin) return onlystatus(fd, UNAUTHORIZED);
-        if (!req->hasposttext) return onlystatus(fd, BAD_REQUEST);
+    }
+}
 
+void route_post(int fd, Request *req, Posts *posts) {
+    if (req->method != POST) {
+        l(ERROR, "Got method %s for path `%s`", methodstr(req->method),
+          req->path);
+        onlystatus(fd, METHOD_NOT_ALLOWED);
+    } else if (!req->loggedin) {
+        l(ERROR, "User is not logged in!");
+        onlystatus(fd, UNAUTHORIZED);
+    } else if (!req->hasposttext) {
+        l(ERROR, "No post text!");
+        onlystatus(fd, BAD_REQUEST);
+    } else {
         Post *post = posts_reserve(posts);
         strncpy(post->username, req->username, sizeof(post->username));
         strncpy(post->posttext, req->posttext, sizeof(post->posttext));
 
         post_redirect(fd, "/");
         endheader(fd);
-    } else {
+    }
+}
+
+void respond(int fd, Request *req, Posts *posts) {
+    if (route(req, "/")) route_root(fd, req, posts);
+    else if (route(req, "/login")) route_login(fd, req);
+    else if (route(req, "/logout")) route_logout(fd, req);
+    else if (route(req, "/post")) route_post(fd, req, posts);
+    else {
+        l(ERROR, "Invalid path `%s`", req->path);
         writestatus(fd, NOT_FOUND);
         contenthtml(fd);
         endheader(fd);

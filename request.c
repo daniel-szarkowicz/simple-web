@@ -43,8 +43,8 @@ HttpStatus parse_content(char *content, Request *request) {
         return BAD_REQUEST;
     };
     if (strcmp(content, "username") == 0) {
-        url_decode(request->username, sizeof(request->username), value);
-        request->loggedin = true;
+        url_decode(request->newusername, sizeof(request->newusername), value);
+        request->hasnewusername = true;
     }
     if (strcmp(content, "posttext") == 0) {
         url_decode(request->posttext, sizeof(request->posttext), value);
@@ -64,7 +64,11 @@ HttpStatus parse_request(int fd, Request *request) {
         l(ERROR, "Failed to read request line, got NULL");
         return BAD_REQUEST;
     }
-    // TODO: check that linebuf ends with '\r\n'
+    if (strstr("linebuf", "\r\n") == NULL) {
+        l(ERROR, "Request line does not contain \\r\\n");
+        return BAD_REQUEST;
+    }
+
     char method[16];
     static_assert(sizeof(request->fullpath) == 1024,
                   "request path size is wrong");
@@ -81,8 +85,11 @@ HttpStatus parse_request(int fd, Request *request) {
     size_t content_length = 0;
     while (true) {
         if (fgets(linebuf, LINE_LEN, stream) == NULL) return BAD_REQUEST;
+        if (strstr("linebuf", "\r\n") == NULL) {
+            l(ERROR, "Request line does not contain \\r\\n");
+            return BAD_REQUEST;
+        }
         if (strcmp(linebuf, "\r\n") == 0) break;
-        // TODO: check that linebuf ends with '\r\n'
 
         char key[128];
         char value[1024];

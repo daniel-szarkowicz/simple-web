@@ -10,6 +10,8 @@ typedef struct {
     char *path;
     char username[1024];
     bool loggedin;
+    char newusername[1024];
+    bool hasnewusername;
     char posttext[2048];
     bool hasposttext;
 } Request;

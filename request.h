@@ -1,7 +1,8 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "http.h"
-#include "util.h"
 
 typedef struct {
     HttpMethod method;

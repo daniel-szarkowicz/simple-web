@@ -29,6 +29,7 @@ typedef enum {
 
 const char *httpstatusstr(HttpStatus status);
 
+// this should only be called if you know that the error was already logged
 #define HTTP_TRY(expr)                                                         \
     do {                                                                       \
         HttpStatus __status__ = expr;                                          \

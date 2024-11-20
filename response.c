@@ -5,6 +5,7 @@
 #include "http.h"
 #include "posts.h"
 #include "response.h"
+#include "util.h"
 
 #define HTML(str) dprintf(fd, "%s", str)
 void html_escape(int fd, char *str) {
@@ -48,6 +49,9 @@ void notfound(int fd) {
 #include "build/notfound.htmlc"
 }
 
+// TODO: support HEAD request where GET is supported
+// TODO: log errors where onlystatus is called
+// TODO: log warnings req can be sign of bad frontend
 void respond(int fd, Request *req, Posts *posts) {
     if (route(req, "/")) {
         if (req->method != GET) return onlystatus(fd, METHOD_NOT_ALLOWED);

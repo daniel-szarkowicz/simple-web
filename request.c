@@ -64,7 +64,7 @@ HttpStatus parse_request(int fd, Request *request) {
         l(ERROR, "Failed to read request line, got NULL");
         return BAD_REQUEST;
     }
-    if (strstr("linebuf", "\r\n") == NULL) {
+    if (strstr(linebuf, "\r\n") == NULL) {
         l(ERROR, "Request line does not contain \\r\\n");
         return BAD_REQUEST;
     }
@@ -85,8 +85,8 @@ HttpStatus parse_request(int fd, Request *request) {
     size_t content_length = 0;
     while (true) {
         if (fgets(linebuf, LINE_LEN, stream) == NULL) return BAD_REQUEST;
-        if (strstr("linebuf", "\r\n") == NULL) {
-            l(ERROR, "Request line does not contain \\r\\n");
+        if (strstr(linebuf, "\r\n") == NULL) {
+            l(ERROR, "Header line does not contain \\r\\n");
             return BAD_REQUEST;
         }
         if (strcmp(linebuf, "\r\n") == 0) break;

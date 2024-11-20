@@ -6,7 +6,7 @@
   </head>
   <body>
     $ if (req->loggedin) { $
-      Hello $ ESCAPE(req->username); $!
+      Hello $ESCAPE(req->username)$!
       <form action="/logout" method="post">
         <input type="submit" value="Log out">
       </form>
@@ -23,9 +23,9 @@
     <h1> Posts: </h1>
     $ for (size_t i = 0; i < posts->count; ++i) { $
       <p>
-        User: $ ESCAPE(posts->data[i].username); $
+        User: $ESCAPE(posts->data[i].username)$
         <br>
-        Post: $ ESCAPE(posts->data[i].posttext); $
+        Post: $ESCAPE(posts->data[i].posttext)$
       </p>
     $ } $
   </body>

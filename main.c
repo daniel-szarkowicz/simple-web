@@ -25,7 +25,7 @@ void handle_client(int fd, Posts *posts) {
     } else {
         l(ERROR, "Something went wrong while parsing the request: %s",
           httpstatusstr(status));
-        onlystatus(fd, status);
+        statuspage(fd, status);
     }
 }
 

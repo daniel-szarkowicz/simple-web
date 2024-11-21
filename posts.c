@@ -16,6 +16,7 @@ void posts_push(Posts *self, Post post) { *posts_reserve(self) = post; }
 
 void posts_free(Posts *self) {
     free(self->data);
+    self->data = NULL;
     self->count = 0;
     self->capacity = 0;
 }

@@ -5,7 +5,7 @@ BUILD_DIR := ./build
 TARGET := $(BUILD_DIR)/server
 TEMPLATER := $(BUILD_DIR)/templ
 
-SRCS := main.c http.c request.c util.c response.c posts.c log.c
+SRCS := main.c http.c request.c util.c response.c posts.c log.c defer.c
 
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:%.o=%.d)

@@ -1,7 +1,8 @@
-DEPFLAGS := -MMD -MP
-CFLAGS := -Werror=all -Werror=extra -Wpedantic -fsanitize=address -ggdb
-
 BUILD_DIR := ./build
+SRC_DIR := ./src
+
+CFLAGS := -Werror=all -Werror=extra -Wpedantic -fsanitize=address -ggdb -I.
+
 TARGET := $(BUILD_DIR)/server
 TEMPLATER := $(BUILD_DIR)/templ
 
@@ -23,20 +24,20 @@ clean:
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # generate c-includable files from html using the templater
-$(BUILD_DIR)/%.htmlc: $(TEMPLATER) %.html | $(BUILD_DIR)
+$(BUILD_DIR)/%.htmlc: $(TEMPLATER) $(SRC_DIR)/%.html | $(BUILD_DIR)
 	$^ $@
 
 # compile single source-file executables (used for the templater)
-$(BUILD_DIR)/%: %.c
+$(BUILD_DIR)/%: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $< -o $@
 
 # generate dependency files (used to generate generated code before compiling)
-$(BUILD_DIR)/%.d: %.c | $(BUILD_DIR)
-	$(CC) -MG -MM -MP -MF $@ -MT $(@:%.d=%.o) $<
+$(BUILD_DIR)/%.d: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) -MG -Ibuild -MM -MF $@ -MT $(@:%.d=%.o) $<
 
 $(BUILD_DIR):
 	mkdir -p $@

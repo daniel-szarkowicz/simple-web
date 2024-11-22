@@ -36,7 +36,7 @@ void writestatus(int fd, HttpStatus status) {
 void statuspage(int fd, HttpStatus status) {
     writestatus(fd, status);
     contenthtml(fd);
-    #include "build/statuspage.htmlc"
+#include "build/statuspage.htmlc"
 }
 
 void post_redirect(int fd, char *loc) {

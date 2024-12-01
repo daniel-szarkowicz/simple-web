@@ -11,12 +11,31 @@
         <input type="submit" value="Log out">
       </form>
       <form action="/post" method="post">
-        <input type="text" id="posttext" name="posttext">
+        <textarea
+          id="posttext"
+          name="posttext"
+          rows=10
+          cols=50
+          placeholder="Write something..."
+          minlength="$INT(POST_MIN_LEN)$"
+          maxlength="$INT(POST_MAX_LEN)$"
+          required
+          autofocus>
+        </textarea>
+        <input type="submit" value="Post">
       </form>
     $ } else { $
       <form action="/login" method="post">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Username"
+          minlength="$INT(USERNAME_MIN_LEN)$"
+          maxlength="$INT(USERNAME_MAX_LEN)$"
+          required
+          autofocus>
         <input type="submit" value="Log in">
       </form>
     $ } $

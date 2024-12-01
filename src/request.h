@@ -4,15 +4,20 @@
 
 #include "http.h"
 
+#define USERNAME_MIN_LEN 2
+#define USERNAME_MAX_LEN 50
+#define POST_MIN_LEN 1
+#define POST_MAX_LEN 500
+
 typedef struct {
     HttpMethod method;
     char fullpath[1024];
     char *path;
-    char username[1024];
+    char username[USERNAME_MAX_LEN + 1];
     bool loggedin;
-    char newusername[1024];
+    char newusername[USERNAME_MAX_LEN + 1];
     bool hasnewusername;
-    char posttext[2048];
+    char posttext[POST_MAX_LEN + 1];
     bool hasposttext;
 } Request;
 

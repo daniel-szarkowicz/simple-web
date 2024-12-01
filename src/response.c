@@ -81,10 +81,10 @@ void route_login(int fd, Request *req) {
               req->username, req->newusername);
         }
         post_redirect(fd, "/");
-        char encoded_username[sizeof(req->newusername)];
+        // url encoded can be up to 3 times longer
+        char encoded_username[sizeof(req->newusername) * 3];
         url_encode(encoded_username, sizeof(encoded_username),
                    req->newusername);
-        strncpy(req->username, req->newusername, sizeof(req->username));
         dprintf(fd, "Set-Cookie: username=%s\r\n", encoded_username);
         endheader(fd);
     }
